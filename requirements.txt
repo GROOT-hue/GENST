@@ -1,0 +1,6 @@
+streamlit
+requests
+pillow
+pymupdf
+gtts
+pylint  # Latest version, no need to pin unless issues persist
