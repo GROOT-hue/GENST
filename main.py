@@ -66,9 +66,38 @@ with tabs[1]:
 
 # 3. Summarization (Disabled)
 with tabs[2]:
-    st.header("AI-Powered Summarization")
-    st.warning("Summarization unavailable due to dependency issues. Requires 'transformers' and 'torch'.")
-
+    st.header(" Summarization")
+    text_to_summarize = st.text_area("Enter text to summarize:", "Paste your text here...")
+    summary_sentences = st.slider("Number of sentences in summary:", 1, 5, 2)
+    if st.button("Summarize"):
+        if text_to_summarize:
+            with st.spinner("Summarizing..."):
+                try:
+                    # Tokenize into sentences
+                    sentences = sent_tokenize(text_to_summarize)
+                    if len(sentences) <= summary_sentences:
+                        st.write("**Summary:**")
+                        st.write(text_to_summarize)
+                    else:
+                        # Simple frequency-based summarization
+                        stop_words = set(stopwords.words("english"))
+                        words = [w.lower() for w in word_tokenize(text_to_summarize) if w.isalnum() and w.lower() not in stop_words]
+                        word_freq = Counter(words)
+                        # Score sentences based on word frequency
+                        sentence_scores = {}
+                        for i, sent in enumerate(sentences):
+                            score = sum(word_freq[w.lower()] for w in word_tokenize(sent) if w.isalnum() and w.lower() in word_freq)
+                            sentence_scores[i] = score / (len(word_tokenize(sent)) + 1)  # Normalize by sentence length
+                        # Select top sentences
+                        top_sentences = sorted(sentence_scores.items(), key=lambda x: x[1], reverse=True)[:summary_sentences]
+                        summary = " ".join(sentences[i] for i, _ in sorted(top_sentences, key=lambda x: x[0]))
+                        st.write("**Summary:**")
+                        st.write(summary)
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+        else:
+            st.warning("Please enter some text to summarize.")
+            
 # 4. Code Debugger (Fixed with pylint.lint)
 with tabs[3]:
     st.header("Code Debugger & Explainer")
