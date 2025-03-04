@@ -70,35 +70,42 @@ with tabs[1]:
 
 # 3. Summarization (Disabled)
 with tabs[2]:
-    st.header(" Summarization")
-    text_to_summarize = st.text_area("Enter text to summarize:", "Paste your text here...")
+    st.header("Summarization")
+    text_to_summarize = st.text_area("Enter text to summarize:", "Paste your text here...", height=200)
+    st.write(f"Sentence count: {len(sent_tokenize(text_to_summarize))} | Word count: {len(text_to_summarize.split())}")
     summary_sentences = st.slider("Number of sentences in summary:", 1, 5, 2)
     if st.button("Summarize"):
-        if text_to_summarize:
-            with st.spinner("Summarizing..."):
-                try:
-                    # Tokenize into sentences
-                    sentences = sent_tokenize(text_to_summarize)
-                    if len(sentences) <= summary_sentences:
-                        st.write("**Summary:**")
-                        st.write(text_to_summarize)
-                    else:
-                        # Simple frequency-based summarization
-                        stop_words = set(stopwords.words("english"))
-                        words = [w.lower() for w in word_tokenize(text_to_summarize) if w.isalnum() and w.lower() not in stop_words]
-                        word_freq = Counter(words)
-                        # Score sentences based on word frequency
-                        sentence_scores = {}
-                        for i, sent in enumerate(sentences):
-                            score = sum(word_freq[w.lower()] for w in word_tokenize(sent) if w.isalnum() and w.lower() in word_freq)
-                            sentence_scores[i] = score / (len(word_tokenize(sent)) + 1)  # Normalize by sentence length
-                        # Select top sentences
-                        top_sentences = sorted(sentence_scores.items(), key=lambda x: x[1], reverse=True)[:summary_sentences]
-                        summary = " ".join(sentences[i] for i, _ in sorted(top_sentences, key=lambda x: x[0]))
-                        st.write("**Summary:**")
-                        st.write(summary)
-                except Exception as e:
-                    st.error(f"Error: {str(e)}")
+        if text_to_summarize.strip():
+            if len(sent_tokenize(text_to_summarize)) < 2:
+                st.warning("Please enter at least two sentences to summarize.")
+            else:
+                with st.spinner("Summarizing..."):
+                    try:
+                        # Tokenize into sentences
+                        sentences = sent_tokenize(text_to_summarize)
+                        if len(sentences) <= summary_sentences:
+                            st.write("**Summary:**")
+                            st.write(text_to_summarize)
+                        else:
+                            # Simple frequency-based summarization
+                            stop_words = set(stopwords.words("english"))
+                            words = [w.lower() for w in word_tokenize(text_to_summarize) if w.isalnum() and w.lower() not in stop_words]
+                            word_freq = Counter(words)
+                            # Score sentences based on word frequency
+                            sentence_scores = {}
+                            for i, sent in enumerate(sentences):
+                                score = sum(word_freq[w.lower()] for w in word_tokenize(sent) if w.isalnum() and w.lower() in word_freq)
+                                sentence_scores[i] = score / (len(word_tokenize(sent)) + 1)  # Normalize by sentence length
+                            # Select top sentences, preserving original order
+                            top_sentences = sorted(sorted(sentence_scores.items(), key=lambda x: x[0])[:summary_sentences], key=lambda x: x[1], reverse=True)
+                            summary_sentences_list = [sentences[i] for i, _ in top_sentences]
+                            st.write("**Summary:**")
+                            for idx, sent in enumerate(summary_sentences_list, 1):
+                                st.write(f"{idx}. {sent}")
+                    except LookupError as e:
+                        st.error(f"NLTK resource missing. Please ensure 'punkt_tab' and 'stopwords' are downloaded: {str(e)}")
+                    except Exception as e:
+                        st.error(f"Error: {str(e)}")
         else:
             st.warning("Please enter some text to summarize.")
             
