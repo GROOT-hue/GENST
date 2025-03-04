@@ -5,7 +5,7 @@ from io import BytesIO
 import tempfile
 import os
 from gtts import gTTS
-from pylint.lint import Run  # Updated import
+from pylint.lint import Run
 from pylint.reporters.text import TextReporter
 from io import StringIO
 import nltk
@@ -13,14 +13,27 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from collections import Counter
 
+# Ensure NLTK data is available at startup
+try:
+    nltk.data.find('tokenizers/punkt_tab')
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    st.warning("Downloading required NLTK resources...")
+    nltk.download('punkt_tab')
+    nltk.download('stopwords')
+    st.success("NLTK resources downloaded successfully.")
+
+# PyMuPDF check
 try:
     import fitz  # PyMuPDF
 except ImportError:
     st.warning("PyMuPDF not installed. ATS Score Checker will be skipped.")
     fitz = None
 
-# API Key (only Hugging Face)
+# API Key (Hugging Face)
 hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
+if not hf_api_key:
+    st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
 # Title
 st.title("GEN IQ")
@@ -68,9 +81,9 @@ with tabs[1]:
             except Exception as e:
                 st.error(f"Error: {str(e)}")
 
-# 3. Summarization (Disabled)
+# 3. Summarization
 with tabs[2]:
-    st.header("Summarization")
+    st.header("AI-Powered Summarization")
     text_to_summarize = st.text_area("Enter text to summarize:", "Paste your text here...", height=200)
     st.write(f"Sentence count: {len(sent_tokenize(text_to_summarize))} | Word count: {len(text_to_summarize.split())}")
     summary_sentences = st.slider("Number of sentences in summary:", 1, 5, 2)
@@ -81,61 +94,51 @@ with tabs[2]:
             else:
                 with st.spinner("Summarizing..."):
                     try:
-                        # Tokenize into sentences
                         sentences = sent_tokenize(text_to_summarize)
                         if len(sentences) <= summary_sentences:
                             st.write("**Summary:**")
                             st.write(text_to_summarize)
                         else:
-                            # Simple frequency-based summarization
                             stop_words = set(stopwords.words("english"))
                             words = [w.lower() for w in word_tokenize(text_to_summarize) if w.isalnum() and w.lower() not in stop_words]
                             word_freq = Counter(words)
-                            # Score sentences based on word frequency
                             sentence_scores = {}
                             for i, sent in enumerate(sentences):
                                 score = sum(word_freq[w.lower()] for w in word_tokenize(sent) if w.isalnum() and w.lower() in word_freq)
-                                sentence_scores[i] = score / (len(word_tokenize(sent)) + 1)  # Normalize by sentence length
-                            # Select top sentences, preserving original order
+                                sentence_scores[i] = score / (len(word_tokenize(sent)) + 1)
                             top_sentences = sorted(sorted(sentence_scores.items(), key=lambda x: x[0])[:summary_sentences], key=lambda x: x[1], reverse=True)
                             summary_sentences_list = [sentences[i] for i, _ in top_sentences]
                             st.write("**Summary:**")
                             for idx, sent in enumerate(summary_sentences_list, 1):
                                 st.write(f"{idx}. {sent}")
                     except LookupError as e:
-                        st.error(f"NLTK resource missing. Please ensure 'punkt_tab' and 'stopwords' are downloaded: {str(e)}")
+                        st.error(f"NLTK resource missing: {str(e)}. Please restart the app.")
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
         else:
             st.warning("Please enter some text to summarize.")
-            
-# 4. Code Debugger (Fixed with pylint.lint)
+
+# 4. Code Debugger
 with tabs[3]:
     st.header("Code Debugger & Explainer")
     code = st.text_area("Your code:", "def example():\n    print(undefined_variable)")
     if st.button("Debug"):
         with st.spinner("Analyzing..."):
             try:
-                # Write code to a temporary file
                 with tempfile.NamedTemporaryFile(suffix=".py", delete=False, mode="w") as tmp:
                     tmp.write(code)
                     tmp_path = tmp.name
-                
-                # Capture pylint output
                 output = StringIO()
                 reporter = TextReporter(output)
                 Run([tmp_path, "--reports=n"], reporter=reporter, exit=False)
                 lint_output = output.getvalue()
                 output.close()
-                
                 if lint_output.strip():
                     st.text("Issues found:")
                     st.text(lint_output)
                 else:
                     st.text("No issues detected by pylint.")
                 os.unlink(tmp_path)
-                
-                # Basic rule-based explanation
                 if "undefined_variable" in code:
                     st.markdown("**Explanation**: `undefined_variable` is not defined. Define it (e.g., `undefined_variable = 'something'`) before using it.")
             except Exception as e:
