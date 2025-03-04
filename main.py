@@ -8,6 +8,10 @@ from gtts import gTTS
 from pylint.lint import Run  # Updated import
 from pylint.reporters.text import TextReporter
 from io import StringIO
+import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from collections import Counter
 
 try:
     import fitz  # PyMuPDF
