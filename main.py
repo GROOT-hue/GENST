@@ -45,8 +45,9 @@ tabs = st.tabs(tab_names)
 # 1. Text-to-Image (Updated with 401 fix)
 with tabs[0]:
     st.header("Text-to-Image Generation")
-    # Debug: Show API key status
     st.write(f"API Key Status: {'Set' if hf_api_key else 'Not Set'} (Length: {len(hf_api_key) if hf_api_key else 0})")
+    if hf_api_key:
+        st.write(f"API Key Preview: {hf_api_key[:5]}...{hf_api_key[-5:]}")  # Show first/last 5 chars
     prompt = st.text_input("Enter a prompt:", "A futuristic city")
     if st.button("Generate Image"):
         if not hf_api_key:
@@ -58,6 +59,8 @@ with tabs[0]:
             with st.spinner("Generating..."):
                 try:
                     response = requests.post(url, headers=headers, json=payload)
+                    st.write(f"Request URL: {url}")  # Debug
+                    st.write(f"Headers: {headers}")  # Debug (key masked)
                     if response.status_code == 200:
                         image = Image.open(BytesIO(response.content))
                         st.image(image, caption="Generated Image")
