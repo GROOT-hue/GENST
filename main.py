@@ -45,35 +45,24 @@ tabs = st.tabs(tab_names)
 # 1. Text-to-Image
 with tabs[0]:
     st.header("Text-to-Image Generation")
-    # Diagnostic outputs
-    st.write(f"API Key Status: {'Set' if hf_api_key else 'Not Set'} (Length: {len(hf_api_key) if hf_api_key else 0})")
-    if hf_api_key:
-        st.write(f"API Key Preview: {hf_api_key[:5]}...{hf_api_key[-5:]}")
-    else:
-        st.write("No API key detected in st.secrets or os.getenv('HF_API_KEY').")
     prompt = st.text_input("Enter a prompt:", "A futuristic city")
-    if st.button("Generate Image"):
-        if not hf_api_key:
-            st.error("No API key provided. Set 'HF_API_KEY' in secrets or environment variables.")
-        else:
-            url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-            headers = {"Authorization": f"Bearer {hf_api_key.strip()}"}
-            payload = {"inputs": prompt}
-            with st.spinner("Generating..."):
-                try:
-                    st.write(f"Sending request to: {url}")
-                    st.write(f"Headers (masked): {{'Authorization': 'Bearer {hf_api_key[:5]}...'}}")
-                    response = requests.post(url, headers=headers, json=payload)
-                    if response.status_code == 200:
-                        image = Image.open(BytesIO(response.content))
-                        st.image(image, caption="Generated Image")
-                    elif response.status_code == 401:
-                        st.error("401 Unauthorized: Invalid or missing API key. Verify your Hugging Face key.")
-                        st.write(f"Full API response: {response.text}")
-                    else:
-                        st.error(f"API error: {response.status_code} - {response.text}")
-                except Exception as e:
-                    st.error(f"Request failed: {str(e)}")
+    if st.button("Generate Image") and hf_api_key:
+        url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
+        headers = {"Authorization": f"Bearer {hf_api_key}"}
+        payload = {"inputs": prompt}
+        with st.spinner("Generating..."):
+            try:
+                response = requests.post(url, headers=headers, json=payload)
+                if response.status_code == 200:
+                    image = Image.open(BytesIO(response.content))
+                    st.image(image, caption="Generated Image")
+                else:
+                    st.error(f"API error: {response.status_code}")
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+    elif not hf_api_key:
+        st.warning("Hugging Face API key missing.")
+
 # 2. Text-to-Audio
 with tabs[1]:
     st.header("Text-to-Audio Conversion")
