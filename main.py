@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for clean layout and updated title color
+# Custom CSS for centered buttons and updated button color
 st.markdown("""
     <style>
     .stApp {
@@ -51,15 +51,21 @@ st.markdown("""
         border-radius: 8px;
     }
     .stButton>button {
-        background-color: #ffffff;
-        color: #00CED1;
+        background-color: #6A0DAD;
+        color: #ffffff;
         border-radius: 8px;
         border: none;
-        box-shadow: 0 0 10px #00CED1;
+        box-shadow: 0 0 10px #6A0DAD;
+        display: block;
+        margin: 10px auto;
+        padding: 10px 20px;
+        font-size: 1rem;
+        width: 80%;
+        max-width: 200px;
     }
     .stButton>button:hover {
-        background-color: #e0e0e0;
-        box-shadow: 0 0 20px #FFA500;
+        background-color: #9B59B6;
+        box-shadow: 0 0 20px #9B59B6;
     }
     h2, h3 {
         color: #00CED1;
@@ -132,10 +138,10 @@ st.markdown("""
         text-align: center;
         transition: all 0.3s;
         cursor: pointer;
-        min-height: 150px;
+        min-height: 180px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
         box-shadow: 0 0 10px #00CED1;
     }
     .tool-card:hover {
@@ -150,6 +156,7 @@ st.markdown("""
     .tool-card p {
         font-size: 0.9rem;
         color: #cccccc;
+        margin-bottom: 20px;
     }
     .back-button-container {
         margin: 20px 0;
@@ -161,6 +168,9 @@ st.markdown("""
         }
         .tool-card-container {
             grid-template-columns: 1fr;
+        }
+        .stButton>button {
+            width: 90%;
         }
     }
     </style>
@@ -219,18 +229,18 @@ if st.session_state.page == "tools":
     """, unsafe_allow_html=True)
     st.markdown('<div class="tool-card-container">', unsafe_allow_html=True)
     
-    # Tool cards in clean grid layout
+    # Tool cards with centered buttons
     for tool in tools:
         st.markdown(
-            f'<div class="tool-card" onclick="document.getElementById(\'{tool["name"]}\').click()">'
+            f'<div class="tool-card">'
             f'<h3>{tool["icon"]} {tool["name"]}</h3>'
-            f'<p>{tool["description"]}</p>'
-            f'</div>',
+            f'<p>{tool["description"]}</p>',
             unsafe_allow_html=True
         )
         if st.button(tool["name"], key=tool["name"], help="Select tool"):
             st.session_state.selected_tool = tool["name"]
             st.session_state.page = "tool"
+        st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif st.session_state.page == "tool" and st.session_state.selected_tool:
