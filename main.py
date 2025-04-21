@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for transparent background, larger title, and custom tool card layout
+# Custom CSS for transparent background, responsive title, and tool card layout
 st.markdown("""
     <style>
     .stApp {
@@ -64,21 +64,35 @@ st.markdown("""
     .stMarkdown, .stWarning, .stError, .stSuccess {
         color: #ffffff;
     }
-    /* Larger and unique styling for the title */
+    /* Responsive title styling */
     .unique-title {
-        font-size: 7rem;
         font-weight: 900;
         text-align: center;
         background: linear-gradient(45deg, #1e90ff, #ff00ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-shadow: 0 0 20px rgba(30, 144, 255, 1), 0 0 30px rgba(255, 0, 255, 0.8);
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        animation: pulse 3s infinite;
         margin: 0;
-        z-index: 1;
+    }
+    @media (min-width: 768px) {
+        .unique-title {
+            font-size: 7rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+    }
+    @media (max-width: 767px) {
+        .unique-title {
+            font-size: 4rem;
+            position: static;
+            transform: none;
+            margin: 20px 0;
+            z-index: 1;
+        }
     }
     @keyframes pulse {
         0% { text-shadow: 0 0 20px rgba(30, 144, 255, 1), 0 0 30px rgba(255, 0, 255, 0.8); }
@@ -123,12 +137,27 @@ st.markdown("""
         left: 50%;
         transform: translateX(-50%);
     }
-    /* Custom positioning for tool cards */
-    .card-1 { top: 10%; left: 10%; width: 20%; }
-    .card-2 { top: 40%; left: 30%; width: 20%; }
-    .card-3 { top: 40%; left: 55%; width: 20%; }
-    .card-4 { top: 70%; left: 30%; width: 20%; }
-    .card-5 { top: 70%; left: 55%; width: 20%; }
+    /* Desktop layout (≥768px) */
+    @media (min-width: 768px) {
+        .card-1 { top: 10%; left: 10%; width: 20%; }
+        .card-2 { top: 40%; left: 30%; width: 20%; }
+        .card-3 { top: 40%; left: 55%; width: 20%; }
+        .card-4 { top: 70%; left: 30%; width: 20%; }
+        .card-5 { top: 70%; left: 55%; width: 20%; }
+    }
+    /* Mobile layout (<768px) */
+    @media (max-width: 767px) {
+        .tool-card {
+            position: static;
+            width: 80%;
+            margin: 20px auto;
+        }
+        .card-1 { order: 1; }
+        .card-2 { order: 2; }
+        .card-3 { order: 3; }
+        .card-4 { order: 4; }
+        .card-5 { order: 5; }
+    }
     .back-button-container {
         margin: 20px 0;
         text-align: left;
