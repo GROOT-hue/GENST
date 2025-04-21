@@ -35,6 +35,51 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
+# Custom CSS for transparent background and modern UI
+st.markdown("""
+    <style>
+    .stApp {
+        background: rgba(20, 20, 20, 0.85);
+        color: #ffffff;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: rgba(40, 40, 40, 0.9);
+        border-radius: 8px;
+        padding: 10px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        color: #ffffff;
+        font-weight: bold;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: rgba(80, 80, 80, 0.7);
+    }
+    .stTextInput, .stTextArea, .stSelectbox, .stFileUploader {
+        background-color: rgba(50, 50, 50, 0.9);
+        color: #ffffff;
+        border-radius: 8px;
+    }
+    .stButton>button {
+        background-color: #1e90ff;
+        color: #ffffff;
+        border-radius: 8px;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #4682b4;
+    }
+    h1, h2, h3 {
+        color: #1e90ff;
+    }
+    .stMarkdown, .stWarning, .stError, .stSuccess {
+        color: #ffffff;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Logo
+st.image("https://via.placeholder.com/150x50.png?text=GEN+IQ+Logo", caption="GEN IQ Logo", use_column_width=False)
+
 # Title
 st.title("GEN IQ")
 
