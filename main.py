@@ -35,24 +35,12 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for transparent background, modern UI, and unique title
+# Custom CSS for transparent background, modern UI, unique title, and tools selection
 st.markdown("""
     <style>
     .stApp {
         background: rgba(20, 20, 20, 0.85);
         color: #ffffff;
-    }
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: rgba(40, 40, 40, 0.9);
-        border-radius: 8px;
-        padding: 10px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        color: #ffffff;
-        font-weight: bold;
-    }
-    .stTabs [data-baseweb="tab"]:hover {
-        background-color: rgba(80, 80, 80, 0.7);
     }
     .stTextInput, .stTextArea, .stSelectbox, .stFileUploader {
         background-color: rgba(50, 50, 50, 0.9);
@@ -68,7 +56,7 @@ st.markdown("""
     .stButton>button:hover {
         background-color: #4682b4;
     }
-    h1, h2, h3 {
+    h2, h3 {
         color: #1e90ff;
     }
     .stMarkdown, .stWarning, .stError, .stSuccess {
@@ -76,13 +64,47 @@ st.markdown("""
     }
     /* Unique styling for the title */
     .unique-title {
-        font-size: 3.5rem;
+        font-size: 5rem;
         font-weight: bold;
         text-align: center;
-        background: linear-gradient(45deg, #1e90ff, #00ffff);
+        background: linear-gradient(45deg, #1e90ff, #c71585);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 10px rgba(30, 144, 255, 0.7);
+        text-shadow: 0 0 15px rgba(30, 144, 255, 0.9), 0 0 25px rgba(199, 21, 133, 0.7);
+        margin-bottom: 30px;
+        animation: pulse 3s infinite;
+    }
+    @keyframes pulse {
+        0% { text-shadow: 0 0 15px rgba(30, 144, 255, 0.9), 0 0 25px rgba(199, 21, 133, 0.7); }
+        50% { text-shadow: 0 0 25px rgba(30, 144, 255, 1), 0 0 35px rgba(199, 21, 133, 1); }
+        100% { text-shadow: 0 0 15px rgba(30, 144, 255, 0.9), 0 0 25px rgba(199, 21, 133, 0.7); }
+    }
+    /* Unique tools selection */
+    .tool-button {
+        display: inline-block;
+        background: rgba(40, 40, 40, 0.9);
+        color: #ffffff;
+        padding: 15px 20px;
+        margin: 5px;
+        border: 2px solid #1e90ff;
+        border-radius: 12px;
+        font-weight: bold;
+        text-align: center;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .tool-button:hover {
+        background: rgba(80, 80, 80, 0.9);
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(30, 144, 255, 0.7);
+    }
+    .tool-button.active {
+        background: #1e90ff;
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(30, 144, 255, 1);
+    }
+    .tool-container {
+        text-align: center;
         margin-bottom: 20px;
     }
     </style>
@@ -91,12 +113,35 @@ st.markdown("""
 # Title with unique styling
 st.markdown('<h1 class="unique-title">GEN IQ</h1>', unsafe_allow_html=True)
 
-# Tabs
-tab_names = ["Text-to-Image", "Text-to-Audio", "Summarization", "Code Debugger", "ATS Score Checker"]
-tabs = st.tabs(tab_names)
+# Tools selection
+if 'selected_tool' not in st.session_state:
+    st.session_state.selected_tool = "Text-to-Image"
 
-# 1. Text-to-Image
-with tabs[0]:
+tools = [
+    {"name": "Text-to-Image", "icon": "🖼️"},
+    {"name": "Text-to-Audio", "icon": "🎵"},
+    {"name": "Summarization", "icon": "📝"},
+    {"name": "Code Debugger", "icon": "💻"},
+    {"name": "ATS Score Checker", "icon": "📄"}
+]
+
+# Render tool buttons
+st.markdown('<div class="tool-container">', unsafe_allow_html=True)
+for tool in tools:
+    active_class = "active" if st.session_state.selected_tool == tool["name"] else ""
+    st.markdown(
+        f'<div class="tool-button {active_class}" '
+        f'onclick="document.getElementById(\'{tool["name"]}\').click()">'
+        f'{tool["icon"]} {tool["name"]}</div>',
+        unsafe_allow_html=True
+    )
+    # Hidden button for handling clicks
+    if st.button(tool["name"], key=tool["name"], help="Select tool", use_container_width=False):
+        st.session_state.selected_tool = tool["name"]
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Tool content based on selection
+if st.session_state.selected_tool == "Text-to-Image":
     st.header("Text-to-Image Generation")
     prompt = st.text_input("Enter a prompt:", "A futuristic city")
     if st.button("Generate Image") and hf_api_key:
@@ -116,8 +161,7 @@ with tabs[0]:
     elif not hf_api_key:
         st.warning("Hugging Face API key missing.")
 
-# 2. Text-to-Audio
-with tabs[1]:
+elif st.session_state.selected_tool == "Text-to-Audio":
     st.header("Text-to-Audio Conversion")
     text = st.text_area("Enter text:", "Hello, this is a test.")
     lang = st.selectbox("Language:", ["en", "es", "fr"], index=0)
@@ -134,8 +178,7 @@ with tabs[1]:
             except Exception as e:
                 st.error(f"Error: {str(e)}")
 
-# 3. Summarization
-with tabs[2]:
+elif st.session_state.selected_tool == "Summarization":
     st.header("AI-Powered Summarization")
     text_to_summarize = st.text_area("Enter text to summarize:", "Paste your text here...", height=200)
     st.write(f"Sentence count: {len(sent_tokenize(text_to_summarize))} | Word count: {len(text_to_summarize.split())}")
@@ -171,8 +214,7 @@ with tabs[2]:
         else:
             st.warning("Please enter some text to summarize.")
 
-# 4. Code Debugger
-with tabs[3]:
+elif st.session_state.selected_tool == "Code Debugger":
     st.header("Code Debugger & Explainer")
     code = st.text_area("Your code:", "def example():\n    print(undefined_variable)")
     if st.button("Debug"):
@@ -197,8 +239,7 @@ with tabs[3]:
             except Exception as e:
                 st.error(f"Error: {str(e)}")
 
-# 5. ATS Score Checker
-with tabs[4]:
+elif st.session_state.selected_tool == "ATS Score Checker":
     st.header("ATS Score Checker")
     resume = st.file_uploader("Upload resume (PDF):", type="pdf")
     job_desc = st.text_area("Job description:", "Enter here...")
