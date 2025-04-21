@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for transparent background, modern UI, unique title, and tool cards
+# Custom CSS for transparent background, modern UI, larger title, and horizontal tool cards
 st.markdown("""
     <style>
     .stApp {
@@ -62,22 +62,22 @@ st.markdown("""
     .stMarkdown, .stWarning, .stError, .stSuccess {
         color: #ffffff;
     }
-    /* Unique styling for the title */
+    /* Larger and unique styling for the title */
     .unique-title {
-        font-size: 5rem;
-        font-weight: bold;
+        font-size: 6rem;
+        font-weight: 900;
         text-align: center;
-        background: linear-gradient(45deg, #1e90ff, #c71585);
+        background: linear-gradient(45deg, #1e90ff, #ff00ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 15px rgba(30, 144, 255, 0.9), 0 0 25px rgba(199, 21, 133, 0.7);
-        margin-bottom: 30px;
+        text-shadow: 0 0 20px rgba(30, 144, 255, 1), 0 0 30px rgba(255, 0, 255, 0.8);
+        margin-bottom: 40px;
         animation: pulse 3s infinite;
     }
     @keyframes pulse {
-        0% { text-shadow: 0 0 15px rgba(30, 144, 255, 0.9), 0 0 25px rgba(199, 21, 133, 0.7); }
-        50% { text-shadow: 0 0 25px rgba(30, 144, 255, 1), 0 0 35px rgba(199, 21, 133, 1); }
-        100% { text-shadow: 0 0 15px rgba(30, 144, 255, 0.9), 0 0 25px rgba(199, 21, 133, 0.7); }
+        0% { text-shadow: 0 0 20px rgba(30, 144, 255, 1), 0 0 30px rgba(255, 0, 255, 0.8); }
+        50% { text-shadow: 0 0 30px rgba(30, 144, 255, 1), 0 0 40px rgba(255, 0, 255, 1); }
+        100% { text-shadow: 0 0 20px rgba(30, 144, 255, 1), 0 0 30px rgba(255, 0, 255, 0.8); }
     }
     /* Tool cards */
     .tool-card {
@@ -90,10 +90,11 @@ st.markdown("""
         text-align: center;
         transition: all 0.3s;
         cursor: pointer;
-        min-height: 150px;
+        min-height: 180px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        flex: 1;
     }
     .tool-card:hover {
         background: rgba(80, 80, 80, 0.9);
@@ -108,11 +109,32 @@ st.markdown("""
         font-size: 0.9rem;
         color: #cccccc;
     }
-    .tool-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    .tool-row {
+        display: flex;
+        flex-wrap: wrap;
         gap: 20px;
-        padding: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .tool-row.first {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .tool-row.second {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .tool-card.first-row {
+        flex: 1;
+        min-width: 250px;
+        max-width: 350px;
+    }
+    .tool-card.second-row {
+        flex: 1;
+        min-width: 250px;
+        max-width: 350px;
     }
     .back-button-container {
         margin: 20px 0;
@@ -160,16 +182,32 @@ tools = [
 if st.session_state.page == "tools":
     # First page: Tools selection
     st.markdown('<h1 class="unique-title">GEN IQ</h1>', unsafe_allow_html=True)
-    st.markdown('<div class="tool-grid">', unsafe_allow_html=True)
-    for tool in tools:
+    
+    # First row: 3 tools
+    st.markdown('<div class="tool-row first">', unsafe_allow_html=True)
+    for tool in tools[:3]:
         st.markdown(
-            f'<div class="tool-card" onclick="document.getElementById(\'{tool["name"]}\').click()">'
+            f'<div class="tool-card first-row" onclick="document.getElementById(\'{tool["name"]}\').click()">'
             f'<h3>{tool["icon"]} {tool["name"]}</h3>'
             f'<p>{tool["description"]}</p>'
             f'</div>',
             unsafe_allow_html=True
         )
-        # Hidden button for handling clicks
+        if st.button(tool["name"], key=tool["name"], help="Select tool", use_container_width=False):
+            st.session_state.selected_tool = tool["name"]
+            st.session_state.page = "tool"
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Second row: 2 tools
+    st.markdown('<div class="tool-row second">', unsafe_allow_html=True)
+    for tool in tools[3:]:
+        st.markdown(
+            f'<div class="tool-card second-row" onclick="document.getElementById(\'{tool["name"]}\').click()">'
+            f'<h3>{tool["icon"]} {tool["name"]}</h3>'
+            f'<p>{tool["description"]}</p>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
         if st.button(tool["name"], key=tool["name"], help="Select tool", use_container_width=False):
             st.session_state.selected_tool = tool["name"]
             st.session_state.page = "tool"
