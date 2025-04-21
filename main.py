@@ -51,14 +51,14 @@ st.markdown("""
         border-radius: 8px;
     }
     .stButton>button {
-        background-color: #1e90ff;
-        color: #ffffff;
+        background-color: #ffffff;
+        color: #1e90ff;
         border-radius: 8px;
         border: none;
         box-shadow: 0 0 10px #1e90ff;
     }
     .stButton>button:hover {
-        background-color: #4682b4;
+        background-color: #e0e0e0;
         box-shadow: 0 0 20px #4682b4;
     }
     h2, h3 {
