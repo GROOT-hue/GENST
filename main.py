@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for unique UI with animated background and vertical 3-card layout
+# Custom CSS for unique UI with animated background and centered vertical 3-card layout
 st.markdown("""
     <style>
     .stApp {
@@ -44,6 +44,10 @@ st.markdown("""
         position: relative;
         min-height: 100vh;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     .stTextInput, .stTextArea, .stSelectbox, .stFileUploader {
         background-color: rgba(50, 50, 50, 0.9);
@@ -55,11 +59,15 @@ st.markdown("""
         color: #ffffff;
         border-radius: 8px;
         border: none;
-        box-shadow: 0 0 10px #1e90ff;
+        box-shadow: 0 0 10px #1e90ff, inset 0 0 10px #1e90ff;
+        transition: all 0.3s;
+        transform-style: preserve-3d;
+        transform: perspective(500px) rotateY(0deg);
     }
     .stButton>button:hover {
         background-color: #4682b4;
-        box-shadow: 0 0 20px #4682b4;
+        transform: perspective(500px) rotateY(10deg) scale(1.05);
+        box-shadow: 0 0 20px #4682b4, inset 0 0 20px #4682b4;
     }
     h2, h3 {
         color: #1e90ff;
@@ -112,17 +120,15 @@ st.markdown("""
         0% { transform: translate(-50%, -50%) translateY(0); }
         100% { transform: translate(-50%, -50%) translateY(-10px); }
     }
-    /* 3D Tool cards with neon borders in vertical 3-card layout */
+    /* 3D Tool cards with neon borders in centered vertical 3-card layout */
     .tool-card-container {
-        position: absolute;
-        top: 60%;
-        left: 50%;
-        transform: translateX(-50%);
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
+        justify-content: center;
+        align-items: center;
         width: 90%;
         z-index: 0;
+        margin-top: 20px;
     }
     .tool-card {
         background: rgba(40, 40, 40, 0.9);
@@ -138,7 +144,7 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
         width: 30%;
-        margin-bottom: 20px;
+        margin: 10px;
         box-shadow: 0 0 10px #1e90ff, inset 0 0 10px #1e90ff;
         transform-style: preserve-3d;
         transform: perspective(500px) rotateY(0deg);
@@ -242,17 +248,10 @@ if st.session_state.page == "tools":
     st.markdown('<div class="background-particles"></div>', unsafe_allow_html=True)
     st.markdown('<div class="tool-card-container">', unsafe_allow_html=True)
     
-    # Tool cards in vertical 3-card-per-row layout
+    # Tool cards in centered vertical 3-card-per-row layout
     for i, tool in enumerate(tools):
         card_class = f"card-{i+1}"
-        st.markdown(
-            f'<div class="tool-card {card_class}" onclick="document.getElementById(\'{tool["name"]}\').click()">'
-            f'<h3>{tool["icon"]} {tool["name"]}</h3>'
-            f'<p>{tool["description"]}</p>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
-        if st.button(tool["name"], key=tool["name"], help="Select tool", use_container_width=False):
+        if st.button(f"{tool['icon']} {tool['name']}\n{tool['description']}", key=tool["name"], help="Select tool", use_container_width=False):
             st.session_state.selected_tool = tool["name"]
             st.session_state.page = "tool"
     st.markdown('</div>', unsafe_allow_html=True)
