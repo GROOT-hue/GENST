@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for unique UI with animated background and vertical 3-card layout
+# Custom CSS for clean layout and updated title color
 st.markdown("""
     <style>
     .stApp {
@@ -52,22 +52,22 @@ st.markdown("""
     }
     .stButton>button {
         background-color: #ffffff;
-        color: #1e90ff;
+        color: #00CED1;
         border-radius: 8px;
         border: none;
-        box-shadow: 0 0 10px #1e90ff;
+        box-shadow: 0 0 10px #00CED1;
     }
     .stButton>button:hover {
         background-color: #e0e0e0;
-        box-shadow: 0 0 20px #4682b4;
+        box-shadow: 0 0 20px #FFA500;
     }
     h2, h3 {
-        color: #1e90ff;
+        color: #00CED1;
     }
     .stMarkdown, .stWarning, .stError, .stSuccess {
         color: #ffffff;
     }
-    /* Animated background particles */
+    /* Animated background particles (CSS-only) */
     .background-particles {
         position: absolute;
         width: 100%;
@@ -75,78 +75,73 @@ st.markdown("""
         top: 0;
         left: 0;
         pointer-events: none;
-        overflow: hidden;
     }
     .particle {
         position: absolute;
-        background: rgba(30, 144, 255, 0.5);
+        background: rgba(0, 206, 209, 0.5);
         border-radius: 50%;
-        animation: float 15s infinite;
+        width: 5px;
+        height: 5px;
+        animation: float 10s infinite;
     }
     @keyframes float {
         0% { transform: translateY(100vh) scale(0); opacity: 1; }
         100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
     }
-    /* Unique holographic title */
+    .particle:nth-child(1) { left: 10%; animation-duration: 12s; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 20%; animation-duration: 15s; animation-delay: 1s; }
+    .particle:nth-child(3) { left: 30%; animation-duration: 10s; animation-delay: 2s; }
+    .particle:nth-child(4) { left: 40%; animation-duration: 13s; animation-delay: 3s; }
+    .particle:nth-child(5) { left: 50%; animation-duration: 11s; animation-delay: 4s; }
+    .particle:nth-child(6) { left: 60%; animation-duration: 14s; animation-delay: 0.5s; }
+    .particle:nth-child(7) { left: 70%; animation-duration: 16s; animation-delay: 1.5s; }
+    .particle:nth-child(8) { left: 80%; animation-duration: 9s; animation-delay: 2.5s; }
+    /* Holographic title with teal/orange gradient */
     .unique-title {
-        font-size: 7rem;
+        font-size: 6rem;
         font-weight: 900;
         text-align: center;
-        background: linear-gradient(45deg, #1e90ff, #ff00ff);
+        background: linear-gradient(45deg, #00CED1, #FFA500);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 20px #1e90ff, 0 0 30px #ff00ff;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        animation: pulse 3s infinite, floatTitle 4s infinite alternate;
-        z-index: 1;
+        text-shadow: 0 0 15px #00CED1, 0 0 25px #FFA500;
+        position: relative;
+        margin: 20px 0;
+        animation: pulse 3s infinite;
     }
     @keyframes pulse {
-        0% { text-shadow: 0 0 20px #1e90ff, 0 0 30px #ff00ff; }
-        50% { text-shadow: 0 0 30px #1e90ff, 0 0 40px #ff00ff; }
-        100% { text-shadow: 0 0 20px #1e90ff, 0 0 30px #ff00ff; }
+        0% { text-shadow: 0 0 15px #00CED1, 0 0 25px #FFA500; }
+        50% { text-shadow: 0 0 25px #00CED1, 0 0 35px #FFA500; }
+        100% { text-shadow: 0 0 15px #00CED1, 0 0 25px #FFA500; }
     }
-    @keyframes floatTitle {
-        0% { transform: translate(-50%, -50%) translateY(0); }
-        100% { transform: translate(-50%, -50%) translateY(-10px); }
-    }
-    /* 3D Tool cards with neon borders in vertical 3-card layout */
+    /* Clean tool card grid */
     .tool-card-container {
-        position: absolute;
-        top: 60%;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
         width: 90%;
-        z-index: 0;
+        max-width: 1200px;
+        margin: 20px auto;
     }
     .tool-card {
         background: rgba(40, 40, 40, 0.9);
         color: #ffffff;
         padding: 20px;
-        border: 2px solid #1e90ff;
+        border: 2px solid #00CED1;
         border-radius: 12px;
         text-align: center;
         transition: all 0.3s;
         cursor: pointer;
-        min-height: 180px;
+        min-height: 150px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        width: 30%;
-        margin-bottom: 20px;
-        box-shadow: 0 0 10px #1e90ff, inset 0 0 10px #1e90ff;
-        transform-style: preserve-3d;
-        transform: perspective(500px) rotateY(0deg);
+        box-shadow: 0 0 10px #00CED1;
     }
     .tool-card:hover {
-        background: rgba(80, 80, 80, 0.9);
-        transform: perspective(500px) rotateY(10deg) scale(1.05);
-        box-shadow: 0 0 20px #1e90ff, inset 0 0 20px #1e90ff;
+        background: rgba(60, 60, 60, 0.9);
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 0 20px #FFA500;
     }
     .tool-card h3 {
         margin: 10px 0;
@@ -156,47 +151,18 @@ st.markdown("""
         font-size: 0.9rem;
         color: #cccccc;
     }
-    .tool-card::after {
-        content: "↓";
-        font-size: 2rem;
-        color: #1e90ff;
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        animation: pulseArrow 2s infinite;
-    }
-    @keyframes pulseArrow {
-        0% { text-shadow: 0 0 5px #1e90ff; }
-        50% { text-shadow: 0 0 10px #1e90ff; }
-        100% { text-shadow: 0 0 5px #1e90ff; }
-    }
-    /* Adjust second row for two cards */
-    .tool-card:nth-child(n+4) {
-        width: 45%;
-    }
     .back-button-container {
         margin: 20px 0;
         text-align: left;
     }
-    /* JavaScript for particle animation */
-    <script>
-        function createParticles() {
-            const particleCount = 50;
-            const particlesContainer = document.querySelector('.stApp');
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = `${Math.random() * 100}vw`;
-                particle.style.width = `${Math.random() * 5 + 2}px`;
-                particle.style.height = particle.style.width;
-                particle.style.animationDuration = `${Math.random() * 10 + 5}s`;
-                particle.style.animationDelay = `${Math.random() * 5}s`;
-                particlesContainer.appendChild(particle);
-            }
+    @media (max-width: 600px) {
+        .unique-title {
+            font-size: 4rem;
         }
-        createParticles();
-    </script>
+        .tool-card-container {
+            grid-template-columns: 1fr;
+        }
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -239,20 +205,30 @@ tools = [
 if st.session_state.page == "tools":
     # First page: Tools selection
     st.markdown('<h1 class="unique-title">GEN IQ</h1>', unsafe_allow_html=True)
-    st.markdown('<div class="background-particles"></div>', unsafe_allow_html=True)
+    st.markdown("""
+        <div class="background-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    """, unsafe_allow_html=True)
     st.markdown('<div class="tool-card-container">', unsafe_allow_html=True)
     
-    # Tool cards in vertical 3-card-per-row layout
-    for i, tool in enumerate(tools):
-        card_class = f"card-{i+1}"
+    # Tool cards in clean grid layout
+    for tool in tools:
         st.markdown(
-            f'<div class="tool-card {card_class}" onclick="document.getElementById(\'{tool["name"]}\').click()">'
+            f'<div class="tool-card" onclick="document.getElementById(\'{tool["name"]}\').click()">'
             f'<h3>{tool["icon"]} {tool["name"]}</h3>'
             f'<p>{tool["description"]}</p>'
             f'</div>',
             unsafe_allow_html=True
         )
-        if st.button(tool["name"], key=tool["name"], help="Select tool", use_container_width=False):
+        if st.button(tool["name"], key=tool["name"], help="Select tool"):
             st.session_state.selected_tool = tool["name"]
             st.session_state.page = "tool"
     st.markdown('</div>', unsafe_allow_html=True)
