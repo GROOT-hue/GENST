@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for unique UI with animated background and horizontal 3D cards
+# Custom CSS for unique UI with animated background and vertical 3-card layout
 st.markdown("""
     <style>
     .stApp {
@@ -112,14 +112,15 @@ st.markdown("""
         0% { transform: translate(-50%, -50%) translateY(0); }
         100% { transform: translate(-50%, -50%) translateY(-10px); }
     }
-    /* 3D Tool cards with neon borders in horizontal layout */
+    /* 3D Tool cards with neon borders in vertical 3-card layout */
     .tool-card-container {
         position: absolute;
         top: 60%;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        justify-content: space-evenly;
+        flex-wrap: wrap;
+        justify-content: space-between;
         width: 90%;
         z-index: 0;
     }
@@ -136,7 +137,8 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         justify-content: center;
-        width: 15%;
+        width: 30%;
+        margin-bottom: 20px;
         box-shadow: 0 0 10px #1e90ff, inset 0 0 10px #1e90ff;
         transform-style: preserve-3d;
         transform: perspective(500px) rotateY(0deg);
@@ -168,6 +170,10 @@ st.markdown("""
         0% { text-shadow: 0 0 5px #1e90ff; }
         50% { text-shadow: 0 0 10px #1e90ff; }
         100% { text-shadow: 0 0 5px #1e90ff; }
+    }
+    /* Adjust second row for two cards */
+    .tool-card:nth-child(n+4) {
+        width: 45%;
     }
     .back-button-container {
         margin: 20px 0;
@@ -236,7 +242,7 @@ if st.session_state.page == "tools":
     st.markdown('<div class="background-particles"></div>', unsafe_allow_html=True)
     st.markdown('<div class="tool-card-container">', unsafe_allow_html=True)
     
-    # Tool cards in horizontal layout
+    # Tool cards in vertical 3-card-per-row layout
     for i, tool in enumerate(tools):
         card_class = f"card-{i+1}"
         st.markdown(
