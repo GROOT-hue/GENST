@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for transparent background and modern UI
+# Custom CSS for transparent background, modern UI, and unique title
 st.markdown("""
     <style>
     .stApp {
@@ -74,14 +74,22 @@ st.markdown("""
     .stMarkdown, .stWarning, .stError, .stSuccess {
         color: #ffffff;
     }
+    /* Unique styling for the title */
+    .unique-title {
+        font-size: 3.5rem;
+        font-weight: bold;
+        text-align: center;
+        background: linear-gradient(45deg, #1e90ff, #00ffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 10px rgba(30, 144, 255, 0.7);
+        margin-bottom: 20px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# Logo
-st.image("https://via.placeholder.com/150x50.png?text=GEN+IQ+Logo", caption="GEN IQ Logo", use_column_width=False)
-
-# Title
-st.title("GEN IQ")
+# Title with unique styling
+st.markdown('<h1 class="unique-title">GEN IQ</h1>', unsafe_allow_html=True)
 
 # Tabs
 tab_names = ["Text-to-Image", "Text-to-Audio", "Summarization", "Code Debugger", "ATS Score Checker"]
