@@ -35,14 +35,15 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for transparent background, responsive title, and tool card layout
+# Custom CSS for unique UI with animated background and 3D cards
 st.markdown("""
     <style>
     .stApp {
-        background: rgba(20, 20, 20, 0.85);
+        background: linear-gradient(45deg, #0a0a1a, #1a1a3a);
         color: #ffffff;
         position: relative;
         min-height: 100vh;
+        overflow: hidden;
     }
     .stTextInput, .stTextArea, .stSelectbox, .stFileUploader {
         background-color: rgba(50, 50, 50, 0.9);
@@ -54,9 +55,11 @@ st.markdown("""
         color: #ffffff;
         border-radius: 8px;
         border: none;
+        box-shadow: 0 0 10px #1e90ff;
     }
     .stButton>button:hover {
         background-color: #4682b4;
+        box-shadow: 0 0 20px #4682b4;
     }
     h2, h3 {
         color: #1e90ff;
@@ -64,42 +67,52 @@ st.markdown("""
     .stMarkdown, .stWarning, .stError, .stSuccess {
         color: #ffffff;
     }
-    /* Responsive title styling */
+    /* Animated background particles */
+    .background-particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+    .particle {
+        position: absolute;
+        background: rgba(30, 144, 255, 0.5);
+        border-radius: 50%;
+        animation: float 15s infinite;
+    }
+    @keyframes float {
+        0% { transform: translateY(100vh) scale(0); opacity: 1; }
+        100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    }
+    /* Unique holographic title */
     .unique-title {
+        font-size: 7rem;
         font-weight: 900;
         text-align: center;
         background: linear-gradient(45deg, #1e90ff, #ff00ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 20px rgba(30, 144, 255, 1), 0 0 30px rgba(255, 0, 255, 0.8);
-        animation: pulse 3s infinite;
-        margin: 0;
-    }
-    @media (min-width: 768px) {
-        .unique-title {
-            font-size: 7rem;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
-        }
-    }
-    @media (max-width: 767px) {
-        .unique-title {
-            font-size: 4rem;
-            position: static;
-            transform: none;
-            margin: 20px 0;
-            z-index: 1;
-        }
+        text-shadow: 0 0 20px #1e90ff, 0 0 30px #ff00ff;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: pulse 3s infinite, floatTitle 4s infinite alternate;
+        z-index: 1;
     }
     @keyframes pulse {
-        0% { text-shadow: 0 0 20px rgba(30, 144, 255, 1), 0 0 30px rgba(255, 0, 255, 0.8); }
-        50% { text-shadow: 0 0 30px rgba(30, 144, 255, 1), 0 0 40px rgba(255, 0, 255, 1); }
-        100% { text-shadow: 0 0 20px rgba(30, 144, 255, 1), 0 0 30px rgba(255, 0, 255, 0.8); }
+        0% { text-shadow: 0 0 20px #1e90ff, 0 0 30px #ff00ff; }
+        50% { text-shadow: 0 0 30px #1e90ff, 0 0 40px #ff00ff; }
+        100% { text-shadow: 0 0 20px #1e90ff, 0 0 30px #ff00ff; }
     }
-    /* Tool cards */
+    @keyframes floatTitle {
+        0% { transform: translate(-50%, -50%) translateY(0); }
+        100% { transform: translate(-50%, -50%) translateY(-10px); }
+    }
+    /* 3D Tool cards with neon borders */
     .tool-card {
         background: rgba(40, 40, 40, 0.9);
         color: #ffffff;
@@ -114,11 +127,14 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
         position: absolute;
+        box-shadow: 0 0 10px #1e90ff, inset 0 0 10px #1e90ff;
+        transform-style: preserve-3d;
+        transform: perspective(500px) rotateY(0deg);
     }
     .tool-card:hover {
         background: rgba(80, 80, 80, 0.9);
-        transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(30, 144, 255, 0.7);
+        transform: perspective(500px) rotateY(10deg) scale(1.05);
+        box-shadow: 0 0 20px #1e90ff, inset 0 0 20px #1e90ff;
     }
     .tool-card h3 {
         margin: 10px 0;
@@ -136,32 +152,41 @@ st.markdown("""
         bottom: 10px;
         left: 50%;
         transform: translateX(-50%);
+        animation: pulseArrow 2s infinite;
     }
-    /* Desktop layout (≥768px) */
-    @media (min-width: 768px) {
-        .card-1 { top: 10%; left: 10%; width: 20%; }
-        .card-2 { top: 40%; left: 30%; width: 20%; }
-        .card-3 { top: 40%; left: 55%; width: 20%; }
-        .card-4 { top: 70%; left: 30%; width: 20%; }
-        .card-5 { top: 70%; left: 55%; width: 20%; }
+    @keyframes pulseArrow {
+        0% { text-shadow: 0 0 5px #1e90ff; }
+        50% { text-shadow: 0 0 10px #1e90ff; }
+        100% { text-shadow: 0 0 5px #1e90ff; }
     }
-    /* Mobile layout (<768px) */
-    @media (max-width: 767px) {
-        .tool-card {
-            position: static;
-            width: 80%;
-            margin: 20px auto;
-        }
-        .card-1 { order: 1; }
-        .card-2 { order: 2; }
-        .card-3 { order: 3; }
-        .card-4 { order: 4; }
-        .card-5 { order: 5; }
-    }
+    /* Custom positioning for tool cards */
+    .card-1 { top: 10%; left: 10%; width: 20%; }
+    .card-2 { top: 40%; left: 30%; width: 20%; }
+    .card-3 { top: 40%; left: 55%; width: 20%; }
+    .card-4 { top: 70%; left: 30%; width: 20%; }
+    .card-5 { top: 70%; left: 55%; width: 20%; }
     .back-button-container {
         margin: 20px 0;
         text-align: left;
     }
+    /* JavaScript for particle animation */
+    <script>
+        function createParticles() {
+            const particleCount = 50;
+            const particlesContainer = document.querySelector('.stApp');
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.width = `${Math.random() * 5 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.animationDuration = `${Math.random() * 10 + 5}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particlesContainer.appendChild(particle);
+            }
+        }
+        createParticles();
+    </script>
     </style>
 """, unsafe_allow_html=True)
 
@@ -204,6 +229,7 @@ tools = [
 if st.session_state.page == "tools":
     # First page: Tools selection
     st.markdown('<h1 class="unique-title">GEN IQ</h1>', unsafe_allow_html=True)
+    st.markdown('<div class="background-particles"></div>', unsafe_allow_html=True)
     
     # Tool cards with custom positioning
     for i, tool in enumerate(tools):
