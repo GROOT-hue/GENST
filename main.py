@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for unique UI with animated background and 3D cards
+# Custom CSS for unique UI with animated background and horizontal 3D cards
 st.markdown("""
     <style>
     .stApp {
@@ -112,7 +112,17 @@ st.markdown("""
         0% { transform: translate(-50%, -50%) translateY(0); }
         100% { transform: translate(-50%, -50%) translateY(-10px); }
     }
-    /* 3D Tool cards with neon borders */
+    /* 3D Tool cards with neon borders in horizontal layout */
+    .tool-card-container {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        justify-content: space-evenly;
+        width: 90%;
+        z-index: 0;
+    }
     .tool-card {
         background: rgba(40, 40, 40, 0.9);
         color: #ffffff;
@@ -126,7 +136,7 @@ st.markdown("""
         display: flex;
         flex-direction: column;
         justify-content: center;
-        position: absolute;
+        width: 15%;
         box-shadow: 0 0 10px #1e90ff, inset 0 0 10px #1e90ff;
         transform-style: preserve-3d;
         transform: perspective(500px) rotateY(0deg);
@@ -159,12 +169,6 @@ st.markdown("""
         50% { text-shadow: 0 0 10px #1e90ff; }
         100% { text-shadow: 0 0 5px #1e90ff; }
     }
-    /* Custom positioning for tool cards */
-    .card-1 { top: 10%; left: 10%; width: 20%; }
-    .card-2 { top: 40%; left: 30%; width: 20%; }
-    .card-3 { top: 40%; left: 55%; width: 20%; }
-    .card-4 { top: 70%; left: 30%; width: 20%; }
-    .card-5 { top: 70%; left: 55%; width: 20%; }
     .back-button-container {
         margin: 20px 0;
         text-align: left;
@@ -230,8 +234,9 @@ if st.session_state.page == "tools":
     # First page: Tools selection
     st.markdown('<h1 class="unique-title">GEN IQ</h1>', unsafe_allow_html=True)
     st.markdown('<div class="background-particles"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="tool-card-container">', unsafe_allow_html=True)
     
-    # Tool cards with custom positioning
+    # Tool cards in horizontal layout
     for i, tool in enumerate(tools):
         card_class = f"card-{i+1}"
         st.markdown(
@@ -244,6 +249,7 @@ if st.session_state.page == "tools":
         if st.button(tool["name"], key=tool["name"], help="Select tool", use_container_width=False):
             st.session_state.selected_tool = tool["name"]
             st.session_state.page = "tool"
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif st.session_state.page == "tool" and st.session_state.selected_tool:
     # Second page: Selected tool
