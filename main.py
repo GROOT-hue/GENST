@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for unique homepage, centered buttons, and hiding Streamlit footer
+# Custom CSS for unique homepage and hiding Streamlit footer
 st.markdown("""
     <style>
     .stApp {
@@ -61,19 +61,13 @@ st.markdown("""
         padding: 12px 24px;
         font-size: 1.1rem;
         font-weight: bold;
-        width: 90%;
-        max-width: 200px;
-        text-align: center;
+        width: 80%;
+        max-width: 220px;
         transition: transform 0.3s, box-shadow 0.3s;
     }
     .stButton>button:hover {
         transform: scale(1.1);
         box-shadow: 0 0 25px rgba(0, 204, 255, 0.9);
-    }
-    .stButton>button:disabled {
-        background: linear-gradient(45deg, #666666, #999999);
-        box-shadow: none;
-        cursor: not-allowed;
     }
     h2, h3 {
         color: #00ffcc;
@@ -174,12 +168,6 @@ st.markdown("""
         color: #e0e0e0;
         margin-bottom: 25px;
     }
-    .tool-card .button-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-    }
     .back-button-container {
         margin: 20px 0;
         text-align: left;
@@ -199,27 +187,10 @@ st.markdown("""
             grid-template-columns: 1fr;
         }
         .stButton>button {
-            width: 95%;
+            width: 90%;
         }
     }
     </style>
-""", unsafe_allow_html=True)
-
-# JavaScript for single-click enforcement
-st.markdown("""
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const buttons = document.querySelectorAll('.stButton button');
-        buttons.forEach(button => {
-            button.addEventListener('click', function() {
-                button.disabled = true;
-                setTimeout(() => {
-                    button.disabled = false;
-                }, 1000); // Re-enable after 1 second
-            });
-        });
-    });
-    </script>
 """, unsafe_allow_html=True)
 
 # Session state for navigation and tool selection
@@ -268,7 +239,7 @@ if st.session_state.page == "tools":
             <div class="particle"></div>
             <div class="particle"></div>
             <div class="particle"></div>
-            <div="particle"></div>
+            <div class="particle"></div>
             <div class="particle"></div>
             <div class="particle"></div>
             <div class="particle"></div>
@@ -277,19 +248,18 @@ if st.session_state.page == "tools":
     """, unsafe_allow_html=True)
     st.markdown('<div class="tool-card-container">', unsafe_allow_html=True)
     
-    # Enhanced tool cards with centered buttons
+    # Enhanced tool cards with 3D effects
     for tool in tools:
         st.markdown(
             f'<div class="tool-card">'
             f'<h3>{tool["icon"]} {tool["name"]}</h3>'
-            f'<p>{tool["description"]}</p>'
-            f'<div class="button-container">',
+            f'<p>{tool["description"]}</p>',
             unsafe_allow_html=True
         )
         if st.button(tool["name"], key=tool["name"], help=f"Explore {tool['name']}"):
             st.session_state.selected_tool = tool["name"]
             st.session_state.page = "tool"
-        st.markdown('</div></div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif st.session_state.page == "tool" and st.session_state.selected_tool:
