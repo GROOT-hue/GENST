@@ -12,6 +12,7 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from collections import Counter
+import uuid
 
 # Ensure NLTK data is available at startup
 try:
@@ -35,7 +36,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for centered buttons and updated button color
+# Custom CSS for centered buttons, updated button color, and hiding Streamlit footer
 st.markdown("""
     <style>
     .stApp {
@@ -161,6 +162,13 @@ st.markdown("""
     .back-button-container {
         margin: 20px 0;
         text-align: left;
+    }
+    /* Hide Streamlit footer and logo */
+    footer { 
+        visibility: hidden; 
+    }
+    .stApp > footer::before {
+        display: none;
     }
     @media (max-width: 600px) {
         .unique-title {
