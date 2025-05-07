@@ -12,7 +12,6 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from collections import Counter
-import uuid
 
 # Ensure NLTK data is available at startup
 try:
@@ -36,11 +35,11 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for centered buttons, updated button color, and hiding Streamlit footer
+# Custom CSS for unique homepage and hiding Streamlit footer
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(45deg, #0a0a1a, #1a1a3a);
+        background: linear-gradient(135deg, #1a0033, #330066);
         color: #ffffff;
         position: relative;
         min-height: 100vh;
@@ -52,29 +51,31 @@ st.markdown("""
         border-radius: 8px;
     }
     .stButton>button {
-        background-color: #6A0DAD;
+        background: linear-gradient(45deg, #ff00ff, #00ccff);
         color: #ffffff;
-        border-radius: 8px;
+        border-radius: 12px;
         border: none;
-        box-shadow: 0 0 10px #6A0DAD;
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.7);
         display: block;
         margin: 10px auto;
-        padding: 10px 20px;
-        font-size: 1rem;
+        padding: 12px 24px;
+        font-size: 1.1rem;
+        font-weight: bold;
         width: 80%;
-        max-width: 200px;
+        max-width: 220px;
+        transition: transform 0.3s, box-shadow 0.3s;
     }
     .stButton>button:hover {
-        background-color: #9B59B6;
-        box-shadow: 0 0 20px #9B59B6;
+        transform: scale(1.1);
+        box-shadow: 0 0 25px rgba(0, 204, 255, 0.9);
     }
     h2, h3 {
-        color: #00CED1;
+        color: #00ffcc;
     }
     .stMarkdown, .stWarning, .stError, .stSuccess {
         color: #ffffff;
     }
-    /* Animated background particles (CSS-only) */
+    /* Enhanced particle background */
     .background-particles {
         position: absolute;
         width: 100%;
@@ -82,82 +83,90 @@ st.markdown("""
         top: 0;
         left: 0;
         pointer-events: none;
+        z-index: 0;
     }
     .particle {
         position: absolute;
-        background: rgba(0, 206, 209, 0.5);
+        background: radial-gradient(circle, rgba(0, 255, 204, 0.8), transparent);
         border-radius: 50%;
-        width: 5px;
-        height: 5px;
-        animation: float 10s infinite;
+        width: 6px;
+        height: 6px;
+        animation: float 8s infinite ease-in-out;
+        box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
     }
     @keyframes float {
-        0% { transform: translateY(100vh) scale(0); opacity: 1; }
-        100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        0% { transform: translateY(100vh) scale(0.5); opacity: 0.8; }
+        50% { opacity: 1; }
+        100% { transform: translateY(-20vh) scale(1.2); opacity: 0; }
     }
-    .particle:nth-child(1) { left: 10%; animation-duration: 12s; animation-delay: 0s; }
-    .particle:nth-child(2) { left: 20%; animation-duration: 15s; animation-delay: 1s; }
-    .particle:nth-child(3) { left: 30%; animation-duration: 10s; animation-delay: 2s; }
-    .particle:nth-child(4) { left: 40%; animation-duration: 13s; animation-delay: 3s; }
-    .particle:nth-child(5) { left: 50%; animation-duration: 11s; animation-delay: 4s; }
-    .particle:nth-child(6) { left: 60%; animation-duration: 14s; animation-delay: 0.5s; }
-    .particle:nth-child(7) { left: 70%; animation-duration: 16s; animation-delay: 1.5s; }
-    .particle:nth-child(8) { left: 80%; animation-duration: 9s; animation-delay: 2.5s; }
-    /* Holographic title with teal/orange gradient */
+    .particle:nth-child(1) { left: 5%; animation-duration: 10s; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 15%; animation-duration: 12s; animation-delay: 1s; }
+    .particle:nth-child(3) { left: 25%; animation-duration: 9s; animation-delay: 2s; }
+    .particle:nth-child(4) { left: 35%; animation-duration: 11s; animation-delay: 3s; }
+    .particle:nth-child(5) { left: 45%; animation-duration: 13s; animation-delay: 0.5s; }
+    .particle:nth-child(6) { left: 55%; animation-duration: 10s; animation-delay: 1.5s; }
+    .particle:nth-child(7) { left: 65%; animation-duration: 14s; animation-delay: 2.5s; }
+    .particle:nth-child(8) { left: 75%; animation-duration: 8s; animation-delay: 3.5s; }
+    .particle:nth-child(9) { left: 85%; animation-duration: 12s; animation-delay: 4s; }
+    .particle:nth-child(10) { left: 95%; animation-duration: 11s; animation-delay: 0.2s; }
+    /* Neon glowing title */
     .unique-title {
-        font-size: 6rem;
+        font-size: 7rem;
         font-weight: 900;
         text-align: center;
-        background: linear-gradient(45deg, #00CED1, #FFA500);
+        background: linear-gradient(45deg, #ff00ff, #00ccff, #ff00ff);
+        background-size: 200%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 15px #00CED1, 0 0 25px #FFA500;
-        position: relative;
-        margin: 20px 0;
-        animation: pulse 3s infinite;
+        text-shadow: 0 0 20px #ff00ff, 0 0 30px #00ccff;
+        margin: 30px 0;
+        animation: neon-glow 4s ease-in-out infinite;
     }
-    @keyframes pulse {
-        0% { text-shadow: 0 0 15px #00CED1, 0 0 25px #FFA500; }
-        50% { text-shadow: 0 0 25px #00CED1, 0 0 35px #FFA500; }
-        100% { text-shadow: 0 0 15px #00CED1, 0 0 25px #FFA500; }
+    @keyframes neon-glow {
+        0% { background-position: 0%; text-shadow: 0 0 20px #ff00ff, 0 0 30px #00ccff; }
+        50% { background-position: 100%; text-shadow: 0 0 30px #ff00ff, 0 0 40px #00ccff; }
+        100% { background-position: 0%; text-shadow: 0 0 20px #ff00ff, 0 0 30px #00ccff; }
     }
-    /* Clean tool card grid */
+    /* 3D tool card grid with neon borders */
     .tool-card-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
         width: 90%;
-        max-width: 1200px;
-        margin: 20px auto;
+        max-width: 1300px;
+        margin: 30px auto;
+        perspective: 1000px;
     }
     .tool-card {
-        background: rgba(40, 40, 40, 0.9);
+        background: rgba(20, 20, 30, 0.95);
         color: #ffffff;
-        padding: 20px;
-        border: 2px solid #00CED1;
-        border-radius: 12px;
+        padding: 25px;
+        border: 2px solid transparent;
+        border-radius: 15px;
         text-align: center;
-        transition: all 0.3s;
-        cursor: pointer;
-        min-height: 180px;
+        transition: transform 0.4s, box-shadow 0.4s, border 0.4s;
+        min-height: 200px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-shadow: 0 0 10px #00CED1;
+        box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
+        transform: rotateY(0deg);
     }
     .tool-card:hover {
-        background: rgba(60, 60, 60, 0.9);
-        transform: translateY(-5px) scale(1.05);
-        box-shadow: 0 0 20px #FFA500;
+        transform: rotateY(5deg) translateY(-10px);
+        box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+        border: 2px solid #ff00ff;
     }
     .tool-card h3 {
-        margin: 10px 0;
-        font-size: 1.5rem;
+        margin: 15px 0;
+        font-size: 1.7rem;
+        color: #00ffcc;
+        text-shadow: 0 0 5px #00ffcc;
     }
     .tool-card p {
-        font-size: 0.9rem;
-        color: #cccccc;
-        margin-bottom: 20px;
+        font-size: 1rem;
+        color: #e0e0e0;
+        margin-bottom: 25px;
     }
     .back-button-container {
         margin: 20px 0;
@@ -172,7 +181,7 @@ st.markdown("""
     }
     @media (max-width: 600px) {
         .unique-title {
-            font-size: 4rem;
+            font-size: 4.5rem;
         }
         .tool-card-container {
             grid-template-columns: 1fr;
@@ -195,36 +204,38 @@ tools = [
     {
         "name": "Text-to-Image",
         "icon": "🖼️",
-        "description": "Generate images from text prompts using AI."
+        "description": "Generate stunning visuals from text prompts using AI."
     },
     {
         "name": "Text-to-Audio",
         "icon": "🎵",
-        "description": "Convert text to speech in multiple languages."
+        "description": "Transform text into speech with multilingual support."
     },
     {
         "name": "Summarization",
         "icon": "📝",
-        "description": "Summarize long texts into concise points."
+        "description": "Condense lengthy texts into concise summaries."
     },
     {
         "name": "Code Debugger",
         "icon": "💻",
-        "description": "Analyze and debug Python code."
+        "description": "Analyze and fix Python code with ease."
     },
     {
         "name": "ATS Score Checker",
         "icon": "📄",
-        "description": "Evaluate resume compatibility with job descriptions."
+        "description": "Optimize your resume for job applications."
     }
 ]
 
 # Page rendering
 if st.session_state.page == "tools":
-    # First page: Tools selection
+    # Unique homepage: Tools selection
     st.markdown('<h1 class="unique-title">GEN IQ</h1>', unsafe_allow_html=True)
     st.markdown("""
         <div class="background-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
             <div class="particle"></div>
             <div class="particle"></div>
             <div class="particle"></div>
@@ -237,7 +248,7 @@ if st.session_state.page == "tools":
     """, unsafe_allow_html=True)
     st.markdown('<div class="tool-card-container">', unsafe_allow_html=True)
     
-    # Tool cards with centered buttons
+    # Enhanced tool cards with 3D effects
     for tool in tools:
         st.markdown(
             f'<div class="tool-card">'
@@ -245,7 +256,7 @@ if st.session_state.page == "tools":
             f'<p>{tool["description"]}</p>',
             unsafe_allow_html=True
         )
-        if st.button(tool["name"], key=tool["name"], help="Select tool"):
+        if st.button(tool["name"], key=tool["name"], help=f"Explore {tool['name']}"):
             st.session_state.selected_tool = tool["name"]
             st.session_state.page = "tool"
         st.markdown('</div>', unsafe_allow_html=True)
@@ -269,7 +280,7 @@ elif st.session_state.page == "tool" and st.session_state.selected_tool:
             with st.spinner("Generating..."):
                 try:
                     response = requests.post(url, headers=headers, json=payload)
-                    if response.status_code == 200:
+                    if response.status_code == 200.
                         image = Image.open(BytesIO(response.content))
                         st.image(image, caption="Generated Image")
                     else:
