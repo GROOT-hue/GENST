@@ -280,7 +280,7 @@ elif st.session_state.page == "tool" and st.session_state.selected_tool:
             with st.spinner("Generating..."):
                 try:
                     response = requests.post(url, headers=headers, json=payload)
-                    if response.status_code == 200.
+                    if response.status_code == 200:
                         image = Image.open(BytesIO(response.content))
                         st.image(image, caption="Generated Image")
                     else:
