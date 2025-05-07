@@ -35,7 +35,7 @@ hf_api_key = st.secrets.get("HF_API_KEY", os.getenv("HF_API_KEY"))
 if not hf_api_key:
     st.warning("Hugging Face API key missing. Text-to-Image will not work.")
 
-# Custom CSS for unique homepage, centered buttons, and hiding Streamlit branding
+# Custom CSS for unique homepage, centered buttons, and hiding Streamlit branding, header, and toolbar
 st.markdown("""
     <style>
     .stApp {
@@ -196,8 +196,25 @@ st.markdown("""
         visibility: hidden !important;
         display: none !important;
     }
-    /* Ensure no Streamlit branding elements are visible */
     .stApp > div:last-child {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    /* Hide Streamlit header and toolbar (including "Manage app" button) */
+    [data-testid="stHeader"], .stHeader, .stAppHeader {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    [data-testid="stToolbar"], .stToolbar, .stAppToolbar {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    [data-testid="stToolbarActionButton"], [data-testid="stToolbarAction"], .stToolbarAction {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    /* Hide any parent containers that might include the header */
+    .stApp > header, .stApp > div:first-child {
         visibility: hidden !important;
         display: none !important;
     }
